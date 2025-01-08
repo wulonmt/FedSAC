@@ -1,0 +1,40 @@
+[build-system]
+requires = [ "hatchling",]
+build-backend = "hatchling.build"
+
+[project]
+name = "flwr_run"
+version = "1.0.0"
+description = "Federated Learning with PyTorch and Flower (Quickstart Example)"
+license = "Apache-2.0"
+
+[tool.flwr.app]
+publisher = "wulonmt"
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.app.components]
+serverapp = "flwr_run.VWserver:app"
+clientapp = "flwr_run.FERclient_FixState:app"
+
+[tool.flwr.app.config]
+save_dir = "./flwr_run"
+num-server-rounds = 3
+clients = 5
+value_weight = 1
+environment = "PendulumFixPos-v0"
+time_step = 5000.0
+
+[tool.flwr.federations.local-simulation.options]
+num-supernodes = 5
+
+[tool.flwr.federations.local-simulation-gpu.options]
+num-supernodes = 20
+
+[tool.hatch.build.targets.wheel]
+packages = [ ".",]
+
+[tool.flwr.federations.local-simulation-gpu.options.backend.client-resources]
+num-cpus = 0.5
+num-gpus = 0.1

@@ -1,0 +1,24 @@
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_fix_state.bat CartPoleSwingUpFixInitState-v1 5 80
+
+cd  C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW
+
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_with_coef.bat CartPoleSwingUpFixInitState-v1 5 80 0 0.2 0 0 8080
+
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_with_coef.bat MountainCarFixPos-v0 5 50 0 0.2 0 0 8082
+
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_with_coef.bat PendulumFixPos-v0 5 30 0 0.2 0 0 8084
+
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_with_coef.bat CartPoleSwingUpFixInitState-v1 10 80 0 0.2 0 0 8086
+
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_with_coef.bat MountainCarFixPos-v0 10 50 0 0.2 0 0 8088
+
+cd C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ;  .\run_with_coef.bat PendulumFixPos-v0 10 30 0 0.2 0 0 8090
+
+cd  C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ; python .\run_simulation.py
+
+cd  C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ; .\flwr_run.bat
+
+cd  C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ; .\run_all_para_with_coef.bat
+
+tensorboard --logdir_spec name1:/path/to/logs/1,name2:/path/to/logs/2
+

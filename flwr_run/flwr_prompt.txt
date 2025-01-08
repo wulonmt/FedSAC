@@ -1,0 +1,3 @@
+pip install -e .
+flwr run . local-simulation-gpu
+flwr run . --run-config "num-server-rounds=5 local-epochs=3"
