@@ -160,3 +160,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+.txt
+.wandb/
+.test/
+.multiagent/
+.SAC_Cartpole/
+.SAC_MountainCar/
+.flwr_run/
+*.pyc
