@@ -2,12 +2,12 @@
 setlocal enabledelayedexpansion
 
 :: Setting environment variables for lists
-:: set "clients_list=5 10 20"
-set "clients_list=20"
-:: set "value_weight_list=0 1"
-set "value_weight_list=1"
-:: set "environments=PendulumFixPos-v0 MountainCarFixPos-v0 CartPoleSwingUpFixInitState-v1"
-set "environments=CartPoleSwingUpFixInitState-v1"
+set "clients_list=20 5 10"
+:: set "clients_list=20"
+set "value_weight_list=0 1"
+:: set "value_weight_list=0"
+set "environments=CartPoleSwingUpFixInitState-v1 PendulumFixPos-v0 MountainCarFixPos-v0"
+:: set "environments=CartPoleSwingUpFixInitState-v1"
 
 :: Get current date and time with wmic command to ensure consistent format
 for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
@@ -30,7 +30,7 @@ for %%c in (%clients_list%) do (
     :: Loop through environments and their rounds
     for %%e in (%environments%) do (
         set "rounds=0"
-        if "%%e"=="PendulumFixPos-v0" set "rounds=20"
+        if "%%e"=="PendulumFixPos-v0" set "rounds=50"
         if "%%e"=="MountainCarFixPos-v0" set "rounds=100"
         if "%%e"=="CartPoleSwingUpFixInitState-v1" set "rounds=150"
         :: Loop through value weights

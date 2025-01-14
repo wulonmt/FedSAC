@@ -3,7 +3,7 @@ from gymnasium.envs.registration import register
 register(
     id='CartPoleSwingUpFixInitState-v1',
     entry_point='Env.envs:CartPoleSwingUpFixInitStateV1',
-    max_episode_steps=1000,
+    max_episode_steps=500,
 )
 
 register(

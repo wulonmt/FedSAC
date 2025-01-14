@@ -69,7 +69,6 @@ class CartPoleSwingUpEnv(gym.Env):
         self.seed()
         self.viewer = None
         self.state = None
-
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]

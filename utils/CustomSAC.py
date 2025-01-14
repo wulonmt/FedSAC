@@ -20,7 +20,8 @@ from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3 import SAC
 from copy import deepcopy
 import time
-
+import wandb
+import sys
 
 SelfSAC = TypeVar("SelfSAC", bound="SAC")
 
@@ -69,6 +70,7 @@ class CustomSAC(SAC):
         add_kl: bool = False,
         kl_coef: float = 0,
         n_envs:int = 1,
+        wandb_config:dict = {}
     ):
         super().__init__(
             policy,
@@ -117,6 +119,27 @@ class CustomSAC(SAC):
         self.current_R = [0 for _ in range(self.n_envs)]
         self.last_R = [0 for _ in range(self.n_envs)]
         self.n_rounds = None
+        
+        model_config = {
+            "learning_rate": learning_rate,
+            "buffer_size": buffer_size,
+            "learning_starts": learning_starts,
+            "batch_size": batch_size,
+            "tau": tau,
+            "gamma": gamma,
+            "train_freq": train_freq,
+            "gradient_steps": gradient_steps,
+            "ent_coef": ent_coef,
+            "target_update_interval": target_update_interval,
+            "target_entropy": target_entropy,
+            "kl_coef": kl_coef,
+            "policy_type": str(policy),
+            "device": str(device)
+        }
+        wandb_config.update(model_config)
+        # print(wandb_config)
+        if wandb.run is None:
+            wandb.init(project="FedVW_SAC", name=wandb_config["log_dir"], config=wandb_config)
         
     def train(self, gradient_steps: int, batch_size: int = 64) -> None:
         # Switch to train mode (this affects batch norm / dropout)
@@ -239,9 +262,19 @@ class CustomSAC(SAC):
         self.logger.record("train/critic_loss", np.mean(critic_losses))
         self.logger.record("train/q_values", np.mean(q_values))
         self.logger.record("train/num_timesteps", self.num_timesteps)
+        wandb.log({
+            "train/n_updates": self._n_updates,
+            "train/ent_coef": np.mean(ent_coefs),
+            "train/actor_loss": np.mean(actor_losses),
+            "train/critic_loss": np.mean(critic_losses),
+            "train/q_values": np.mean(q_values),
+            "train/num_timesteps": self.num_timesteps
+        }, step=int(self.num_timesteps))
         # self.logger.record("train/kl_values", np.mean(kl_values))
         if len(ent_coef_losses) > 0:
             self.logger.record("train/ent_coef_loss", np.mean(ent_coef_losses))
+            wandb.log({"train/ent_coef_loss": np.mean(ent_coef_losses)}, 
+                     step=int(self.num_timesteps))
 
     def collect_rollouts(
         self,
@@ -305,6 +338,9 @@ class CustomSAC(SAC):
                     self.current_R[n] = 0
                     # print(f"env {n} done, reward: {self.last_R[n]}")
                     self.logger.record("rollout/Return", self.last_R[n])
+                    wandb.log({
+                        "rollout/Return": self.last_R[n],
+                    }, step=int(self.num_timesteps))
 
             self.num_timesteps += env.num_envs
             num_collected_steps += 1
@@ -345,3 +381,31 @@ class CustomSAC(SAC):
         callback.on_rollout_end()
 
         return RolloutReturn(num_collected_steps * env.num_envs, num_collected_episodes, continue_training)
+    
+    def _dump_logs(self) -> None:
+        """
+        Write log.
+        """
+        assert self.ep_info_buffer is not None
+        assert self.ep_success_buffer is not None
+
+        time_elapsed = max((time.time_ns() - self.start_time) / 1e9, sys.float_info.epsilon)
+        fps = int((self.num_timesteps - self._num_timesteps_at_start) / time_elapsed)
+        self.logger.record("time/episodes", self._episode_num, exclude="tensorboard")
+        if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
+            self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
+            wandb.log({
+            "rollout/ep_rew_mean": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]),
+            "rollout/ep_len_mean": safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]),
+            }, step=int(self.num_timesteps))
+        self.logger.record("time/fps", fps)
+        self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")
+        self.logger.record("time/total_timesteps", self.num_timesteps, exclude="tensorboard")
+        if self.use_sde:
+            self.logger.record("train/std", (self.actor.get_std()).mean().item())
+
+        if len(self.ep_success_buffer) > 0:
+            self.logger.record("rollout/success_rate", safe_mean(self.ep_success_buffer))
+        # Pass the number of timesteps for tensorboard
+        self.logger.dump(step=self.num_timesteps)

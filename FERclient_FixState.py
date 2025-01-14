@@ -17,7 +17,7 @@ import flwr as fl
 from collections import OrderedDict
 import os
 import sys
-# import Env
+import Env
 from utils.CustomSAC import CustomSAC
 from utils.init_pos_config import get_init_pos, assert_alarm
 
@@ -73,6 +73,12 @@ class FixPosClient(fl.client.NumPyClient):
             self.tensorboard_log = f"multiagent/{time_str.get_time_to_minute()}_{environment}_VW_{value_as_weight}/{self.tensorboard_log}"
         self.tensorboard_log = log_dir + f"/{environment}/" if log_dir else self.tensorboard_log
         trained_env = self.env
+        wandb_config = {
+            "environment": environment,
+            "value_weight": value_weight,
+            "client_index": client_index,
+            "log_dir": log_dir
+        }
         self.model = CustomSAC("MlpPolicy",
                     trained_env,
                     batch_size=batch_size,
@@ -82,7 +88,8 @@ class FixPosClient(fl.client.NumPyClient):
                     tensorboard_log=self.tensorboard_log,
                     device = "cuda:0",
                     # add_kl=add_kl,
-                    # kl_coef=kl_coef
+                    # kl_coef=kl_coef,
+                    wandb_config=wandb_config
                     )
         # policy_kwargs=dict(net_arch=dict(pi=[256, 256, 256], vf=[256, 256, 256])),
 

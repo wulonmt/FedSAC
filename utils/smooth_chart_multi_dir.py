@@ -85,7 +85,7 @@ if __name__ == "__main__":
         
         for log_name, custom_name in zip(args.log_names, custom_names):
             try:
-                metrics_data = process_folder(log_name, prefix)
+                metrics_data = process_folder(log_name, prefix + "_")
                 for metric, (x, y) in metrics_data.items():
                     if args.remove_outliers:
                         x, y = remove_outliers(x, y, args.iqr_factor)
@@ -122,9 +122,9 @@ if __name__ == "__main__":
             # save_path = os.path.join(save_subdir, f"{safe_metric_name}{outlier_info}.png")
             save_path = os.path.join(save_subdir, f"{safe_metric_name}.png")
             plt.savefig(save_path)
-            print(f"Saved plot for {metric} (Prefix: {prefix}) to {save_path}")
+            # print(f"Saved plot for {metric} (Prefix: {prefix}) to {save_path}")
             plt.close()
 
-        print(f"All plots for prefix {prefix} have been saved to {os.path.join(args.save_dir, prefix)}")
+        # print(f"All plots for prefix {prefix} have been saved to {os.path.join(args.save_dir, prefix)}")
 
-    print("Processing complete for all prefixes.")
+    # print("Processing complete for all prefixes.")
