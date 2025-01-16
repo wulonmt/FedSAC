@@ -18,3 +18,9 @@ register(
     entry_point='Env.envs:PendulumFixPos',
     max_episode_steps=200,
 )
+
+register(
+    id='HopperFixLength-v0',
+    entry_point='Env.envs:HopperFixLength',
+    max_episode_steps=1000,
+)
