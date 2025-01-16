@@ -2,12 +2,12 @@
 setlocal enabledelayedexpansion
 
 :: Setting environment variables for lists
-:: set "clients_list=20 5 10"
-set "clients_list=10"
+set "clients_list=5 10 20"
+:: set "clients_list=10"
 set "value_weight_list=0 1"
 :: set "value_weight_list=1"
-:: set "environments=CartPoleSwingUpFixInitState-v1 PendulumFixPos-v0 MountainCarFixPos-v0"
-set "environments=MountainCarFixPos-v0"
+:: set "environments=CartPoleSwingUpFixInitState-v1 PendulumFixPos-v0 MountainCarFixPos-v0 HopperFixLength-v0"
+set "environments=HopperFixLength-v0"
 
 :: Get current date and time with wmic command to ensure consistent format
 for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
@@ -29,10 +29,11 @@ for %%c in (%clients_list%) do (
     
     :: Loop through environments and their rounds
     for %%e in (%environments%) do (
-        set "rounds=0"
+        set "rounds=10"
         if "%%e"=="PendulumFixPos-v0" set "rounds=50"
         if "%%e"=="MountainCarFixPos-v0" set "rounds=100"
         if "%%e"=="CartPoleSwingUpFixInitState-v1" set "rounds=150"
+        if "%%e"=="HopperFixLength-v0" set "rounds=100"
         :: Loop through value weights
         for %%v in (%value_weight_list%) do (
             
@@ -61,7 +62,6 @@ for %%c in (%clients_list%) do (
             for /l %%i in (0,1,!last_agent!) do (
                 echo Starting client %%i
                 start /B python FERclient_FixState.py -i %%i -e %%e --value_weight %%v --log_dir !save_dir!
-                timeout /t 1 /nobreak > nul
             )
 
             :: Start checking script and wait for it to complete

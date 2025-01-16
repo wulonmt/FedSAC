@@ -5,16 +5,22 @@ from gymnasium.envs.registration import register
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 import os
+import time
 
 class HopperFixLength(HopperEnv):
     def __init__(self, xml_file='./Env/envs/hopper.xml', thigh_scale = 1, leg_scale = 1, **kwrgs):
         self.xml_file = xml_file
         self.thigh_scale = thigh_scale
         self.leg_scale = leg_scale
+        self.modified_xml = f"./Env/envs/hopper_{self.thigh_scale}_{self.leg_scale}.xml"
         
         # 先讀取和修改 XML，再調用父類的初始化
-        self._modify_xml()
-        super().__init__(xml_file="./Env/envs/new_hopper.xml", **kwrgs)
+        if not os.path.exists(self.modified_xml):
+            # 生成 XML 文件
+            self._modify_xml()
+            time.sleep(1)
+        
+        super().__init__(xml_file=self.modified_xml, **kwrgs)
     
     def _get_xml_string(self):
         # 返回修改後的 XML 字符串
@@ -78,5 +84,5 @@ class HopperFixLength(HopperEnv):
         pretty_xml = reparsed.toprettyxml(indent="  ")
         
         # 保存到文件
-        with open("./Env/envs/new_hopper.xml", 'w', encoding='utf-8') as f:
+        with open(self.modified_xml, 'w', encoding='utf-8') as f:
             f.write(pretty_xml)

@@ -89,7 +89,7 @@ class FixPosClient(fl.client.NumPyClient):
                     device = "cuda:0",
                     # add_kl=add_kl,
                     # kl_coef=kl_coef,
-                    wandb_config=wandb_config
+                    # wandb_config=wandb_config
                     )
         # policy_kwargs=dict(net_arch=dict(pi=[256, 256, 256], vf=[256, 256, 256])),
 

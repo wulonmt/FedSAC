@@ -68,7 +68,8 @@ def train():
     #     device = "cuda:0",
     # )
     # Train the agent
-    model.learn(total_timesteps=int(5e3 * 50), tb_log_name=time_str)
+    # model.learn(total_timesteps=int(5e3 * 50), tb_log_name=time_str)
+    model.learn(total_timesteps=int(5e3 * 2), tb_log_name=time_str)
     print("log name: ", tensorboard_log + time_str)
     model.save(tensorboard_log + time_str + "/model")
 
