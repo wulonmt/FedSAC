@@ -136,10 +136,11 @@ class CustomSAC(SAC):
             "policy_type": str(policy),
             "device": str(device)
         }
-        wandb_config.update(model_config)
-        # print(wandb_config)
-        if wandb.run is None:
-            wandb.init(project="FedVW_SAC", name=wandb_config["log_dir"], config=wandb_config)
+        if len(wandb_config) > 0:
+            wandb_config.update(model_config)
+            # print(wandb_config)
+            if wandb.run is None:
+                wandb.init(project="FedVW_SAC", name=wandb_config["log_dir"], config=wandb_config)
         
     def train(self, gradient_steps: int, batch_size: int = 64) -> None:
         # Switch to train mode (this affects batch norm / dropout)
@@ -262,19 +263,21 @@ class CustomSAC(SAC):
         self.logger.record("train/critic_loss", np.mean(critic_losses))
         self.logger.record("train/q_values", np.mean(q_values))
         self.logger.record("train/num_timesteps", self.num_timesteps)
-        wandb.log({
-            "train/n_updates": self._n_updates,
-            "train/ent_coef": np.mean(ent_coefs),
-            "train/actor_loss": np.mean(actor_losses),
-            "train/critic_loss": np.mean(critic_losses),
-            "train/q_values": np.mean(q_values),
-            "train/num_timesteps": self.num_timesteps
-        }, step=int(self.num_timesteps))
+        if wandb.run:
+            wandb.log({
+                "train/n_updates": self._n_updates,
+                "train/ent_coef": np.mean(ent_coefs),
+                "train/actor_loss": np.mean(actor_losses),
+                "train/critic_loss": np.mean(critic_losses),
+                "train/q_values": np.mean(q_values),
+                "train/num_timesteps": self.num_timesteps
+            }, step=int(self.num_timesteps))
         # self.logger.record("train/kl_values", np.mean(kl_values))
         if len(ent_coef_losses) > 0:
             self.logger.record("train/ent_coef_loss", np.mean(ent_coef_losses))
-            wandb.log({"train/ent_coef_loss": np.mean(ent_coef_losses)}, 
-                     step=int(self.num_timesteps))
+            if wandb.run:
+                wandb.log({"train/ent_coef_loss": np.mean(ent_coef_losses)}, 
+                        step=int(self.num_timesteps))
 
     def collect_rollouts(
         self,
@@ -338,9 +341,10 @@ class CustomSAC(SAC):
                     self.current_R[n] = 0
                     # print(f"env {n} done, reward: {self.last_R[n]}")
                     self.logger.record("rollout/Return", self.last_R[n])
-                    wandb.log({
-                        "rollout/Return": self.last_R[n],
-                    }, step=int(self.num_timesteps))
+                    if wandb.run:
+                        wandb.log({
+                            "rollout/Return": self.last_R[n],
+                        }, step=int(self.num_timesteps))
 
             self.num_timesteps += env.num_envs
             num_collected_steps += 1
@@ -395,10 +399,11 @@ class CustomSAC(SAC):
         if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
             self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
-            wandb.log({
-            "rollout/ep_rew_mean": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]),
-            "rollout/ep_len_mean": safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]),
-            }, step=int(self.num_timesteps))
+            if wandb.run:
+                wandb.log({
+                "rollout/ep_rew_mean": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]),
+                "rollout/ep_len_mean": safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]),
+                }, step=int(self.num_timesteps))
         self.logger.record("time/fps", fps)
         self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")
         self.logger.record("time/total_timesteps", self.num_timesteps, exclude="tensorboard")

@@ -21,6 +21,12 @@ INIT_POS = {
         {"init_x": 2, "init_angle": -np.pi/2},
         {"init_x": -2, "init_angle": -np.pi/2},
         {"init_x": 0, "init_angle": np.pi}
+    ],
+    "HopperFixLength-v0": [
+        {'thigh_scale': 1.5, 'leg_scale': 1},
+        {'thigh_scale': 1, 'leg_scale': 1.5},
+        {'thigh_scale': 1.5, 'leg_scale': 1.5},
+        {'thigh_scale': 1, 'leg_scale': 1}
     ]
 }
 
