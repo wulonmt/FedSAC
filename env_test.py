@@ -19,9 +19,10 @@ from utils.CustomSAC import CustomSAC
 def train():
     n_cpu = 3
     batch_size = 64
-    env_name = "PendulumFixPos-v0"
+    # env_name = "PendulumFixPos-v0"
     # env_name = "MountainCarFixPos-v0"
     # env_name = "CartPoleSwingUpFixInitState-v1"
+    env_name = "HopperFixLength-v0"
     assert is_valid_env(env_name), f"Only environments {', '.join(get_available_envs(env_name))} are available"
     index = 3
     #trained_env = GrayScale_env
