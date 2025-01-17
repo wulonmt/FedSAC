@@ -17,7 +17,7 @@ from utils.init_pos_config import get_init_pos, is_valid_env, get_available_envs
 from utils.CustomSAC import CustomSAC
 
 def train():
-    n_cpu = 3
+    n_cpu = 8
     batch_size = 64
     # env_name = "PendulumFixPos-v0"
     # env_name = "MountainCarFixPos-v0"
@@ -68,8 +68,8 @@ def train():
     #     device = "cuda:0",
     # )
     # Train the agent
-    # model.learn(total_timesteps=int(5e3 * 50), tb_log_name=time_str)
-    model.learn(total_timesteps=int(5e3 * 2), tb_log_name=time_str)
+    model.learn(total_timesteps=int(5e3 * 600), tb_log_name=time_str)
+    # model.learn(total_timesteps=int(5e3 * 2), tb_log_name=time_str)
     print("log name: ", tensorboard_log + time_str)
     model.save(tensorboard_log + time_str + "/model")
 

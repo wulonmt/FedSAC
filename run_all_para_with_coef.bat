@@ -33,7 +33,7 @@ for %%c in (%clients_list%) do (
         if "%%e"=="PendulumFixPos-v0" set "rounds=50"
         if "%%e"=="MountainCarFixPos-v0" set "rounds=100"
         if "%%e"=="CartPoleSwingUpFixInitState-v1" set "rounds=150"
-        if "%%e"=="HopperFixLength-v0" set "rounds=100"
+        if "%%e"=="HopperFixLength-v0" set "rounds=600"
         :: Loop through value weights
         for %%v in (%value_weight_list%) do (
             
