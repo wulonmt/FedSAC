@@ -17,12 +17,13 @@ from utils.init_pos_config import get_init_pos, is_valid_env, get_available_envs
 from utils.CustomSAC import CustomSAC
 
 def train():
-    n_cpu = 8
+    n_cpu = 4
     batch_size = 64
     # env_name = "PendulumFixPos-v0"
     # env_name = "MountainCarFixPos-v0"
     # env_name = "CartPoleSwingUpFixInitState-v1"
-    env_name = "HopperFixLength-v0"
+    # env_name = "HopperFixLength-v0"
+    env_name = "HalfCheetahFixLength-v0"
     assert is_valid_env(env_name), f"Only environments {', '.join(get_available_envs(env_name))} are available"
     index = 3
     #trained_env = GrayScale_env
