@@ -89,8 +89,8 @@ def train():
                 break
 
 def eval():
-    model = SAC.load("SAC_CartPole/" + "model")
-    env_name = "CartPoleSwingUpFixInitState-v1"
+    model = SAC.load("multiagent\\2025_01_17_21_04_c10_HopperFixLength-v0_VW1\\HopperFixLength-v0\\0_entcoefauto_klcoef_0.0e+00_addKL_False_VW_True\\" + "model")
+    env_name = "HopperFixLength-v0"
     assert is_valid_env(env_name), f"Only environments {', '.join(get_available_envs(env_name))} are available"
     index = 3
     # env = gym.make(env_name, render_mode="human")
@@ -108,5 +108,5 @@ def eval():
                 break
 
 if __name__ == "__main__":
-    train()
-    # eval()
+    # train()
+    eval()
