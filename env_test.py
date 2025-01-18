@@ -90,8 +90,8 @@ def train():
                 break
 
 def eval():
-    model = SAC.load("SAC_CartPole/" + "model")
-    env_name = "CartPoleSwingUpFixInitState-v1"
+    model = SAC.load("202501181633/" + "model")
+    env_name = "HalfCheetahFixLength-v0"
     assert is_valid_env(env_name), f"Only environments {', '.join(get_available_envs(env_name))} are available"
     index = 3
     # env = gym.make(env_name, render_mode="human")
@@ -99,15 +99,14 @@ def eval():
     while True:
         obs, info = env.reset()
         done = truncated = False
-        counter = 0
+
         while not (done or truncated):
             action, _ = model.predict(obs)
             obs, reward, done, truncated, info = env.step(action)
-            env.render()
-            counter += 1
-            if counter > 1000:
-                break
+            env.render()    
+            if done or truncated:
+                print("done")
 
 if __name__ == "__main__":
-    train()
-    # eval()
+    # train()
+    eval()

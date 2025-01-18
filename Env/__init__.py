@@ -29,6 +29,6 @@ register(
 register(
     id='HalfCheetahFixLength-v0',
     entry_point='Env.envs:HalfCheetahFixLength',
-    max_episode_steps=1000,
+    max_episode_steps=300,
     reward_threshold=4800.0,
 )
