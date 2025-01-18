@@ -28,6 +28,12 @@ INIT_POS = {
         {'thigh_scale': 1.5, 'leg_scale': 1.5},
         {'thigh_scale': 0.6, 'leg_scale': 1},
         {'thigh_scale': 1, 'leg_scale': 1}
+    ],
+    "HalfCheetahFixLength-v0": [
+        {'bthigh_scale': 1.5, 'fthigh_scale': 1.0},
+        {'bthigh_scale': 1.0, 'fthigh_scale': 1.5},
+        {'bthigh_scale': 1.5, 'fthigh_scale': 1.5},
+        {'bthigh_scale': 1.0, 'fthigh_scale': 1.0}
     ]
 }
 
