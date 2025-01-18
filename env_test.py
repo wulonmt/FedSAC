@@ -89,9 +89,10 @@ def train():
             if counter > 1000:
                 break
 
-def eval():
+def eval(): 
     model = SAC.load("202501181633/" + "model")
     env_name = "HalfCheetahFixLength-v0"
+
     assert is_valid_env(env_name), f"Only environments {', '.join(get_available_envs(env_name))} are available"
     index = 3
     # env = gym.make(env_name, render_mode="human")
