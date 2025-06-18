@@ -29,9 +29,21 @@ class MountainCarFixPos(Continuous_MountainCarEnv):
             options.update({"low": init_low, "high": init_high})
         else:
             options = {"low": init_low, "high": init_high}
+
+        if float(options.get("low")) == 0 and float(options.get("high")) == -2.0: 
+            # only if init_x == -1 and init_limit == -1 => random setting
+            options = {"low": -1, "high": 0.5}
+
         low, high = utils.maybe_parse_reset_bounds(options, -0.6, -0.4)
         self.state = np.array([self.np_random.uniform(low=low, high=high), 0])
 
         if self.render_mode == "human":
             self.render()
         return np.array(self.state, dtype=np.float32), {}
+    
+class MountainCarFixPosGoalOriented(MountainCarFixPos):
+    def step(self, action: int):
+        obs, old_reward, terminated, truncated, _ = super().step(action)
+        new_reward = 1 if terminated else 0
+
+        return obs, new_reward, terminated, truncated, {}

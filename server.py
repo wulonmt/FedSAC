@@ -15,6 +15,7 @@ import sys
 import numpy as np
 from utils.Ptime import Ptime
 import os
+from utils.dc_webhook import send_discord_webhook
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--port", help="local port", type=str, default="8080")
@@ -82,7 +83,7 @@ def main():
         min_available_clients=clients,
     )
 
-    send_line('Starting experiment')
+    send_discord_webhook('Starting experiment')
     # Start Flower server
     flwr_server = fl.server
     flwr_server.start_server(
@@ -90,24 +91,10 @@ def main():
         config=fl.server.ServerConfig(num_rounds=total_rounds),
         strategy=strategy,
     )
-    send_line('Experiment done !!!!!')
+    send_discord_webhook('Experiment done !!!!!')
     sys.exit()
     
-def send_line(message:str):
-    token = '7ZPjzeQrRcI70yDFnhBd4A6xpU8MddE7MntCSdbLBgC'
-    url = 'https://notify-api.line.me/api/notify'
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-    data = {
-        'message':message
-    }
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        print("LINE message send sucessfuly")
-    else:
-        print("LINE message send error：", response.status_code)
-    
+
 if __name__ == "__main__":
     main()
     

@@ -37,6 +37,7 @@ def paser_argument():
     parser.add_argument("--value_weight", help="value weighted, 1 for true and 0 for false",  type=int, default=0)
     parser.add_argument("--add_kl", help="KLD regilization add, 1 for true and 0 for false",  type=int, default=0)
     parser.add_argument("--log_dir", help="server & client log dir", type=str, default = None)
+    parser.add_argument("--n_cpu", help="number of cpu", type=int, default = 2)
 
     return parser.parse_args()
 
@@ -53,8 +54,8 @@ class FixPosClient(fl.client.NumPyClient):
                 save_log="True",
                 add_kl=0,
                 ent_coef=None,
-                kl_coef=None):
-        n_cpu = 8
+                kl_coef=None,
+                n_cpu=2):
         batch_size = 64
         add_kl = True if add_kl == 1 else False
         value_as_weight = True if value_weight == 1 else False
@@ -202,6 +203,7 @@ def main():
                           log_dir=args.log_dir,
                           log_name=args.log_name,
                           time_step=args.time_step,
+                          n_cpu=args.n_cpu
                           )
     fl.client.start_client(
         server_address=f"127.0.0.1:" + args.port,

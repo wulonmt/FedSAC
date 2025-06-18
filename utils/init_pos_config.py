@@ -6,16 +6,37 @@ INIT_POS = {
         {"init_x": -0.3, "x_limit": 0.15},
         {"init_x": -0.6, "x_limit": 0.15},
         {"init_x": 0.3, "x_limit": 0.15},
-        {"init_x": 0, "x_limit": 0.15}
+        {"init_x": -1, "x_limit": -1}
+    ],
+    "MountainCarFixPos-v1": [
+        {"init_x": 0, "x_limit": 0.15},
+        {"init_x": -0.3, "x_limit": 0.15},
+        {"init_x": -0.6, "x_limit": 0.15},
+        {"init_x": 0.3, "x_limit": 0.15},
+        {"init_x": -1, "x_limit": -1}
     ],
     "PendulumFixPos-v0": [
         {"init_theta": np.pi*3/4, "init_thetadot": 1},
         {"init_theta": -np.pi*3/4, "init_thetadot": 1},
         {"init_theta": np.pi/2, "init_thetadot": 1},
         {"init_theta": -np.pi/2, "init_thetadot": 1},
-        {"init_theta": np.pi, "init_thetadot": 1}
+        {"init_theta": -1, "init_thetadot": -1}
+    ],
+    "PendulumFixPos-v1": [
+        {"init_theta": np.pi*3/4, "init_thetadot": 1},
+        {"init_theta": -np.pi*3/4, "init_thetadot": 1},
+        {"init_theta": np.pi/2, "init_thetadot": 1},
+        {"init_theta": -np.pi/2, "init_thetadot": 1},
+        {"init_theta": -1, "init_thetadot": -1}
     ],
     "CartPoleSwingUpFixInitState-v1": [
+        {"init_x": 2, "init_angle": np.pi/2},
+        {"init_x": -2, "init_angle": np.pi/2},
+        {"init_x": 2, "init_angle": -np.pi/2},
+        {"init_x": -2, "init_angle": -np.pi/2},
+        {"init_x": 0, "init_angle": np.pi}
+    ],
+    "CartPoleSwingUpFixInitState-v2": [
         {"init_x": 2, "init_angle": np.pi/2},
         {"init_x": -2, "init_angle": np.pi/2},
         {"init_x": 2, "init_angle": -np.pi/2},

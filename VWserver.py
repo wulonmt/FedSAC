@@ -42,6 +42,7 @@ from utils.Ptime import Ptime
 import os
 from math import exp
 import csv
+from utils.dc_webhook import send_discord_webhook
 
 def parser_arguments():
     parser = argparse.ArgumentParser()
@@ -97,6 +98,7 @@ class SaveModelStrategy(FedAvg):
             print("________inplace_______")
             # Does in-place weighted average of results
             aggregated_ndarrays = self.VW_aggregate_inplace(results)
+            # aggregated_ndarrays = self.VW_AbsMax_aggregate_inplace(results)
         else:
             print("________out place_______")
             # Convert results
@@ -131,6 +133,92 @@ class SaveModelStrategy(FedAvg):
         max_value = max(all_values)
         values_exp_sum = sum([exp(value - max_value) for value in all_values])
         multiple_weights = [exp(value - max_value) / values_exp_sum for value in all_values]
+        self.client_weights.append(all_values + multiple_weights)
+
+        scaling_factors = np.asarray(multiple_weights)
+
+        def _try_inplace(
+            x: NDArray, y: Union[NDArray, np.float64], np_binary_op: np.ufunc
+        ) -> NDArray:
+            return (  # type: ignore[no-any-return]
+                np_binary_op(x, y, out=x)
+                if np.can_cast(y, x.dtype, casting="same_kind")
+                else np_binary_op(x, np.array(y, x.dtype), out=x)
+            )
+
+        # Let's do in-place aggregation
+        # Get first result, then add up each other
+        params = [
+            _try_inplace(x, scaling_factors[0], np_binary_op=np.multiply)
+            for x in parameters_to_ndarrays(results[0][1].parameters)
+        ]
+
+        for i, (_, fit_res) in enumerate(results[1:], start=1):
+            res = (
+                _try_inplace(x, scaling_factors[i], np_binary_op=np.multiply)
+                for x in parameters_to_ndarrays(fit_res.parameters)
+            )
+            params = [
+                reduce(partial(_try_inplace, np_binary_op=np.add), layer_updates)
+                for layer_updates in zip(params, res)
+            ]
+
+        return params
+    
+    def VW_normalized_aggregate_inplace(self, results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
+        """Compute in-place RL-value weighted soft-max average."""
+        all_values = [fit_res.num_examples for (_, fit_res) in results]
+        mean = sum(all_values) / len(all_values)
+        variance = sum((x - mean) ** 2 for x in all_values) / len(all_values)
+        normalize_values = [(value - mean)/(variance**0.5 + 1e-4) for value in all_values]
+
+        values_exp_sum = sum([exp(value) for value in normalize_values])
+        multiple_weights = [exp(value) / values_exp_sum for value in normalize_values]
+        self.client_weights.append(all_values + multiple_weights)
+
+        scaling_factors = np.asarray(multiple_weights)
+
+        def _try_inplace(
+            x: NDArray, y: Union[NDArray, np.float64], np_binary_op: np.ufunc
+        ) -> NDArray:
+            return (  # type: ignore[no-any-return]
+                np_binary_op(x, y, out=x)
+                if np.can_cast(y, x.dtype, casting="same_kind")
+                else np_binary_op(x, np.array(y, x.dtype), out=x)
+            )
+
+        # Let's do in-place aggregation
+        # Get first result, then add up each other
+        params = [
+            _try_inplace(x, scaling_factors[0], np_binary_op=np.multiply)
+            for x in parameters_to_ndarrays(results[0][1].parameters)
+        ]
+
+        for i, (_, fit_res) in enumerate(results[1:], start=1):
+            res = (
+                _try_inplace(x, scaling_factors[i], np_binary_op=np.multiply)
+                for x in parameters_to_ndarrays(fit_res.parameters)
+            )
+            params = [
+                reduce(partial(_try_inplace, np_binary_op=np.add), layer_updates)
+                for layer_updates in zip(params, res)
+            ]
+
+        return params
+    
+    def VW_AbsMax_aggregate_inplace(self, results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
+        """Compute in-place RL-value weighted soft-max average."""
+        all_values = [fit_res.num_examples for (_, fit_res) in results]
+
+        np_array = np.array(all_values)
+        max_index = np.argmax(np_array) # 找到最大值的索引
+        
+        # 創建一個與原陣列相同長度的零陣列
+        multiple_weights = np.zeros_like(np_array)
+        
+        # 將最大值位置設置為1
+        multiple_weights[max_index] = 1
+
         self.client_weights.append(all_values + multiple_weights)
 
         scaling_factors = np.asarray(multiple_weights)
@@ -255,7 +343,7 @@ def main():
         min_available_clients=clients,
     )
 
-    send_line(f"Starting Lab: {save_dir.split('/')[-1]}")
+    send_discord_webhook(f"Starting Lab: {save_dir.split('/')[-1]}")
     # Start Flower server
     flwr_server = fl.server
     flwr_server.start_server(
@@ -263,23 +351,8 @@ def main():
         config=fl.server.ServerConfig(num_rounds=total_rounds),
         strategy=strategy,
     )
-    send_line('Lab End!')
+    send_discord_webhook('Lab End!')
     sys.exit()
-    
-def send_line(message:str):
-    token = '7ZPjzeQrRcI70yDFnhBd4A6xpU8MddE7MntCSdbLBgC'
-    url = 'https://notify-api.line.me/api/notify'
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-    data = {
-        'message':message
-    }
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        print("LINE message send sucessfuly")
-    else:
-        print("LINE message send error：", response.status_code)
     
 if __name__ == "__main__":
     main()

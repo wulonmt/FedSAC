@@ -11,14 +11,18 @@ from utils.init_pos_config import get_init_pos, get_init_list, assert_alarm
 
 import cv2
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-l", "--log_model", help="modle to be logged", type=str)
-parser.add_argument("-e", "--environment", help="which my- env been used", type=str, required=True)
-args = parser.parse_args()
 RECORD = False
 SNAPSHOT = True
 EVALUATE = False
 DISPLAY = False
+
+def setting():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "--log_model", help="modle to be logged", type=str)
+    parser.add_argument("-e", "--environment", help="which my- env been used", type=str, required=True)
+    args = parser.parse_args()
+    return args
+    
 
 class RewardDisplayWrapper(gym.Wrapper):
     def __init__(self, env):
@@ -41,6 +45,9 @@ class RewardDisplayWrapper(gym.Wrapper):
     def render(self, mode='rgb_array'):
         # 獲取原始圖像
         img = super().render()
+        if img is None:
+            print(type(img))
+            print(img)
         
         # 在圖像上添加文字
         img = np.ascontiguousarray(img, dtype=np.uint8)
@@ -83,6 +90,7 @@ def make_wrapped_env(env_name, i=0):
 
 
 if __name__ == "__main__":
+    args = setting()
     index = 4
     assert_alarm(args.environment)
     env_name = args.environment

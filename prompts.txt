@@ -22,3 +22,14 @@ cd  C:\Users\jeff8\Desktop\my_plan\FedER_SAC ; conda activate FedVW ; .\run_all_
 
 tensorboard --logdir_spec name1:/path/to/logs/1,name2:/path/to/logs/2
 
+cd E:\my_plan\FedER_SAC ; conda activate Fed ;  .\run_with_coef.bat PendulumFixPos-v1 5 200 0 0.2 0 0 8080
+
+cd E:\my_plan\FedER_SAC ; conda activate Fed ;  .\run_with_coef.bat MountainCarFixPos-v1 5 250 0 0.2 0 0 8080
+
+cd E:\my_plan\FedER_SAC ; conda activate Fed ;  .\run_with_coef.bat CartPoleSwingUpFixInitState-v2 5 450 0 0.2 0 0 8080
+
+cd E:\my_plan\FedER_SAC ; conda activate Fed ;  .\run_with_coef.bat CartPoleSwingUpFixInitState-v2 5 600 0 0.2 0 1 8080
+
+cd E:\my_plan\FedER_SAC ; conda activate Fed ;  .\run_all_para_with_coef.bat
+
+cd C:\Users\jeff8\Desktop\FedER_SAC ; conda activate Fed ;  .\run_all_para_with_coef.bat

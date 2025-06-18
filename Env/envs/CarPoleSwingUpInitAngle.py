@@ -179,6 +179,8 @@ class CartPoleSwingUpFixInitStateV0(CartPoleSwingUpV0):
 
     def reset(self, seed=None, options=None):
         self.seed(seed)
+        # state: x, xdot, theta, thetadot
+
         self.state = State(
             *self.np_random.normal(
                 loc=np.array([self.init_x, 0.0, self.init_angle, 0.0]),
@@ -203,7 +205,7 @@ class CartPoleSwingUpViewer:
 
     def __init__(self, cart, pole, world_width):
         # pylint:disable=import-outside-toplevel
-        from gym.envs.classic_control import rendering
+        from . import rendering
 
         # pylint:enable=import-outside-toplevel
 
@@ -313,3 +315,29 @@ class CartPoleSwingUpViewer:
     def close(self):
         """Closes the underlying Viewer instance"""
         self.viewer.close()
+
+class CartPoleSwingUpFixPosGoalOriented(CartPoleSwingUpFixInitStateV1):
+    def __init__(self, render_mode=None, init_x=0, init_angle=np.pi, total_stable_steps = 150, reward_threshold = 0.8):
+        super().__init__(render_mode, init_x, init_angle)
+        self.total_stable_steps = total_stable_steps
+        self.reward_threadshold = reward_threshold
+        self.current_stable_steps = 0
+
+    def step(self, acction):
+        next_obs, old_reward, done, truncated, _ = super().step(acction)
+        #old_reward = cos(theta), -1 < old_reward < 1
+        new_reward = 0
+        if old_reward > self.reward_threadshold:
+            self.current_stable_steps += 1
+        else:
+            self.current_stable_steps = 0
+        
+        if self.current_stable_steps > self.total_stable_steps:
+            new_reward = 1
+            done = True
+
+        return next_obs, new_reward, done, truncated, {}
+
+    def reset(self, seed=None, options=None):
+        self.current_stable_steps = 0
+        return super().reset(seed, options)        

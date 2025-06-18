@@ -7,6 +7,12 @@ register(
 )
 
 register(
+    id='CartPoleSwingUpFixInitState-v2',
+    entry_point='Env.envs:CartPoleSwingUpFixPosGoalOriented',
+    max_episode_steps=500,
+)
+
+register(
     id='MountainCarFixPos-v0',
     entry_point='Env.envs:MountainCarFixPos',
     max_episode_steps=300,
@@ -14,8 +20,21 @@ register(
 )
 
 register(
+    id='MountainCarFixPos-v1',
+    entry_point='Env.envs:MountainCarFixPosGoalOriented',
+    max_episode_steps=300,
+    reward_threshold=-110.0,
+)
+
+register(
     id='PendulumFixPos-v0',
     entry_point='Env.envs:PendulumFixPos',
+    max_episode_steps=200,
+)
+
+register(
+    id='PendulumFixPos-v1',
+    entry_point='Env.envs:PendulumFixPosGoalOriented',
     max_episode_steps=200,
 )
 
