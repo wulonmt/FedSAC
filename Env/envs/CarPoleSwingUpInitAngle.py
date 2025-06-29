@@ -317,7 +317,7 @@ class CartPoleSwingUpViewer:
         self.viewer.close()
 
 class CartPoleSwingUpFixPosGoalOriented(CartPoleSwingUpFixInitStateV1):
-    def __init__(self, render_mode=None, init_x=0, init_angle=np.pi, total_stable_steps = 150, reward_threshold = 0.8):
+    def __init__(self, render_mode=None, init_x=0, init_angle=np.pi, total_stable_steps = 500, reward_threshold = 0.8):
         super().__init__(render_mode, init_x, init_angle)
         self.total_stable_steps = total_stable_steps
         self.reward_threadshold = reward_threshold
@@ -329,11 +329,12 @@ class CartPoleSwingUpFixPosGoalOriented(CartPoleSwingUpFixInitStateV1):
         new_reward = 0
         if old_reward > self.reward_threadshold:
             self.current_stable_steps += 1
+            new_reward = 1
         else:
             self.current_stable_steps = 0
         
         if self.current_stable_steps > self.total_stable_steps:
-            new_reward = 1
+            new_reward = 500
             done = True
 
         return next_obs, new_reward, done, truncated, {}

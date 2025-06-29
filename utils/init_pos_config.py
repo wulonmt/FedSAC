@@ -56,6 +56,27 @@ INIT_POS = {
         {'bthigh_scale': 1.5, 'fthigh_scale': 1.5},
         {'bthigh_scale': 0.7, 'fthigh_scale': 0.7},
         {'bthigh_scale': 1.0, 'fthigh_scale': 1.0}
+    ],
+    "CrowdedHighway-v0": [
+        {"density": 2, "count": 50},
+        {"density": 2, "count": 100},
+        {"density": 0.5, "count": 50},
+        {"density": 0.5, "count": 100},
+        {"density": -1, "count": -1},
+    ],
+    "CrowdedHighway-v1": [
+        {"density": 2, "count": 50},
+        {"density": 2, "count": 100},
+        {"density": 0.5, "count": 50},
+        {"density": 0.5, "count": 100},
+        {"density": -1, "count": -1},
+    ],
+    "CarRacingFixSeed-v0": [
+        {"index": 0},
+        {"index": 1},
+        {"index": 2},
+        {"index": 3},
+        {"index": 4}
     ]
 }
 

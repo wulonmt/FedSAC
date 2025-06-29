@@ -8,7 +8,7 @@ set "value_weight_list=0 1"
 :: set "value_weight_list=1"
 :: set "environments=CartPoleSwingUpFixInitState-v1 PendulumFixPos-v0 MountainCarFixPos-v0 HopperFixLength-v0 HalfCheetahFixLength-v0"
 :: set "environments=PendulumFixPos-v1 MountainCarFixPos-v1"
-set "environments=MountainCarFixPos-v1"
+set "environments=CartPoleSwingUpFixInitState-v2"
 
 set "total_cpu=20"
 
@@ -46,6 +46,7 @@ for %%c in (%clients_list%) do (
         if "%%e"=="MountainCarFixPos-v0" set "rounds=100"
         if "%%e"=="MountainCarFixPos-v1" set "rounds=100"
         if "%%e"=="CartPoleSwingUpFixInitState-v1" set "rounds=150"
+        if "%%e"=="CartPoleSwingUpFixInitState-v2" set "rounds=150"
         if "%%e"=="HopperFixLength-v0" set "rounds=600"
         if "%%e"=="HalfCheetahFixLength-v0" set "rounds=600"
         :: Loop through value weights

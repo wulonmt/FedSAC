@@ -9,7 +9,7 @@ register(
 register(
     id='CartPoleSwingUpFixInitState-v2',
     entry_point='Env.envs:CartPoleSwingUpFixPosGoalOriented',
-    max_episode_steps=500,
+    max_episode_steps=800,
 )
 
 register(
@@ -50,4 +50,21 @@ register(
     entry_point='Env.envs:HalfCheetahFixLength',
     max_episode_steps=300,
     reward_threshold=4800.0,
+)
+
+register(
+    id='CrowdedHighway-v0',
+    entry_point='Env.envs:CrowdedHighway',
+    max_episode_steps=500,
+)
+
+register(
+    id='CrowdedHighway-v1',
+    entry_point='Env.envs:CrowdedHighway_V1',
+    max_episode_steps=500,
+)
+
+register(
+    id='CarRacingFixSeed-v0',
+    entry_point='Env.envs:CarRacingFixSeed',
 )

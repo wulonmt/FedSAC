@@ -29,11 +29,15 @@ def train():
     env_name = "CartPoleSwingUpFixInitState-v2"
     # env_name = "HopperFixLength-v0"
     # env_name = "HalfCheetahFixLength-v0"
+    # env_name = "CrowdedHighway-v0"
+    # env_name = "CrowdedHighway-v1"
+    # env_name = "CarRacingFixSeed-v0"
+    
     assert is_valid_env(env_name), f"Only environments {', '.join(get_available_envs(env_name))} are available"
-    index = 3
+    index = 4
     #trained_env = GrayScale_env
     trained_env = make_vec_env(env_name, n_envs=n_cpu, vec_env_cls=SubprocVecEnv, seed = 1, env_kwargs = get_init_pos(env_name, index))
-    tensorboard_log = f"./{env_name}_"
+    tensorboard_log = f"./env_test/{env_name}_"
 
     #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu,)
     #env = gym.make("highway-fast-v0", render_mode="human")
@@ -137,5 +141,5 @@ def eval():
                 cv2.waitKey(1000)  # 暫停 1 秒
 
 if __name__ == "__main__":
-    # train()
-    eval()
+    train()
+    # eval()
