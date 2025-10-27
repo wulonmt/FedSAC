@@ -3,3 +3,5 @@ gymnasium==1.1.1
 flwr==1.18.0
 tensorboard==2.19.0
 dotenv
+wandb
+gym[all]
