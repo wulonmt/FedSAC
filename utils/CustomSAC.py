@@ -23,6 +23,8 @@ import time
 import wandb
 import sys
 
+from collections import deque
+
 SelfSAC = TypeVar("SelfSAC", bound="SAC")
 
 class CustomSAC(SAC):
@@ -117,7 +119,7 @@ class CustomSAC(SAC):
         self.kl_coef = kl_coef
         self.n_envs = n_envs
         self.current_R = [0 for _ in range(self.n_envs)]
-        self.last_R = [0 for _ in range(self.n_envs)]
+        self.last_R = [deque(maxlen=3) for _ in range(self.n_envs)]
         self.n_rounds = None
         
         model_config = {
@@ -337,14 +339,22 @@ class CustomSAC(SAC):
             for n in range(self.n_envs):
                 self.current_R[n] += rewards[n]
                 if dones[n]:
-                    self.last_R[n] = self.current_R[n]
+                    self.last_R[n].append(self.current_R[n])
                     self.current_R[n] = 0
                     # print(f"env {n} done, reward: {self.last_R[n]}")
-                    self.logger.record("rollout/Return", self.last_R[n])
-                    if wandb.run:
-                        wandb.log({
-                            "rollout/Return": self.last_R[n],
-                        }, step=int(self.num_timesteps))
+                    if not self.last_R[n]:
+                        self.logger.record("rollout/Return", 0)
+                        if wandb.run:
+                            wandb.log({
+                                "rollout/Return": 0,
+                            }, step=int(self.num_timesteps))
+
+                    else:
+                        self.logger.record("rollout/Return", sum(self.last_R[n])/len(self.last_R[n]))
+                        if wandb.run:
+                            wandb.log({
+                                "rollout/Return": self.last_R[n],
+                            }, step=int(self.num_timesteps))
 
             self.num_timesteps += env.num_envs
             num_collected_steps += 1

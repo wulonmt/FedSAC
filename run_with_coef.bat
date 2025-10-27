@@ -77,7 +77,7 @@ echo %env%
 set /a last_agent=%agents% - 1
 for /l %%i in (0,1,%last_agent%) do (
     echo Starting client %%i
-    start /B python FERclient_FixState.py -i %%i -e %env% --kl_coef %kl% --ent_coef %ent% --add_kl %add_kl% --value_weight %vw% --log_dir %save_dir% -p %port%
+    start "Client %%i" cmd /k python FERclient_FixState.py -i %%i -e %env% --kl_coef %kl% --ent_coef %ent% --add_kl %add_kl% --value_weight %vw% --log_dir %save_dir% -p %port%
 )
 
 :loop

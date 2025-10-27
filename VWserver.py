@@ -89,16 +89,21 @@ class SaveModelStrategy(FedAvg):
         failures: List[BaseException],
     ) -> Tuple[Parameters, dict]:
         if not results:
+            print("___________no results___________")
+            send_discord_webhook("No Result Aggregate Fail")
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
+            print("___________failures___________")
+            send_discord_webhook("Failures Aggregate Fail")
             return None, {}
 
         if self.inplace:
             print("________inplace_______")
             # Does in-place weighted average of results
-            aggregated_ndarrays = self.VW_aggregate_inplace(results)
+            # aggregated_ndarrays = self.VW_aggregate_softmax_inplace(results)
             # aggregated_ndarrays = self.VW_AbsMax_aggregate_inplace(results)
+            aggregated_ndarrays = self.VW_min_normalized_aggregate_inplace(results)
         else:
             print("________out place_______")
             # Convert results
@@ -127,12 +132,14 @@ class SaveModelStrategy(FedAvg):
 
         return parameters, metrics
     
-    def VW_aggregate_inplace(self, results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
+    def VW_aggregate_softmax_inplace(self, results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
         """Compute in-place RL-value weighted soft-max average."""
         all_values = [fit_res.num_examples for (_, fit_res) in results]
         max_value = max(all_values)
-        values_exp_sum = sum([exp(value - max_value) for value in all_values])
-        multiple_weights = [exp(value - max_value) / values_exp_sum for value in all_values]
+        exp_values = [exp(value - max_value) for value in all_values]
+        exp_values = [round(x, 6) for x in exp_values]
+        values_exp_sum = sum(exp_values)
+        multiple_weights = [value/ values_exp_sum for value in exp_values]
         self.client_weights.append(all_values + multiple_weights)
 
         scaling_factors = np.asarray(multiple_weights)
@@ -165,15 +172,25 @@ class SaveModelStrategy(FedAvg):
 
         return params
     
-    def VW_normalized_aggregate_inplace(self, results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
+    def VW_min_normalized_aggregate_inplace(self, results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
         """Compute in-place RL-value weighted soft-max average."""
         all_values = [fit_res.num_examples for (_, fit_res) in results]
-        mean = sum(all_values) / len(all_values)
-        variance = sum((x - mean) ** 2 for x in all_values) / len(all_values)
-        normalize_values = [(value - mean)/(variance**0.5 + 1e-4) for value in all_values]
 
-        values_exp_sum = sum([exp(value) for value in normalize_values])
-        multiple_weights = [exp(value) / values_exp_sum for value in normalize_values]
+        # Find minimum value
+        min_value = min(all_values)
+
+        # Calculate adjusted values by subtracting minimum
+        adjusted_values = [value - min_value for value in all_values]
+
+        # Sum of adjusted values
+        adjusted_sum = sum(adjusted_values) + 1e-4
+
+        # Calculate weights: (adjusted_value / sum) + (1 / len(values))
+        h = len(adjusted_values)
+        assert h > 0, "h should be greater than 0"
+
+        multiple_weights = [(value / adjusted_sum + (1 / h)) / 2 for value in adjusted_values]
+
         self.client_weights.append(all_values + multiple_weights)
 
         scaling_factors = np.asarray(multiple_weights)
@@ -312,18 +329,79 @@ class SaveModelStrategy(FedAvg):
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 
-def server_fn(context: Context) -> ServerAppComponents:
-        strategy = SaveModelStrategy(
-            save_dir=context.run_config["save_dir"],
-            num_rounds=context.run_config["num-server-rounds"],
-            min_fit_clients=context.run_config["clients"],
-            min_evaluate_clients=context.run_config["clients"],
-            min_available_clients=context.run_config['clients'],
-        )
-        config = ServerConfig(num_rounds=context.run_config["num-server-rounds"])
-        return ServerAppComponents(strategy=strategy, config=config)
+# def server_fn(context: Context) -> ServerAppComponents:
+#         strategy = SaveModelStrategy(
+#             save_dir=context.run_config["save_dir"],
+#             num_rounds=context.run_config["num-server-rounds"],
+#             min_fit_clients=context.run_config["clients"],
+#             min_evaluate_clients=context.run_config["clients"],
+#             min_available_clients=context.run_config['clients'],
+#         )
+#         config = ServerConfig(num_rounds=context.run_config["num-server-rounds"])
+#         return ServerAppComponents(strategy=strategy, config=config)
 
-app = ServerApp(server_fn=server_fn)
+# app = ServerApp(server_fn=server_fn)
+
+from flwr.server.server import Server, fit_clients
+from logging import INFO, WARN
+FitResultsAndFailures = tuple[
+    list[tuple[ClientProxy, FitRes]],
+    list[Union[tuple[ClientProxy, FitRes], BaseException]],
+]
+
+def send_DC_fit_round(
+    self,
+    server_round: int,
+    timeout: Optional[float],
+) -> Optional[
+    tuple[Optional[Parameters], dict[str, Scalar], FitResultsAndFailures]
+]:
+    """Perform a single round of federated averaging."""
+    # Get clients and their respective instructions from strategy
+    client_instructions = self.strategy.configure_fit(
+        server_round=server_round,
+        parameters=self.parameters,
+        client_manager=self._client_manager,
+    )
+
+    if not client_instructions:
+        log(INFO, "configure_fit: no clients selected, cancel")
+        return None
+    log(
+        INFO,
+        "configure_fit: strategy sampled %s clients (out of %s)",
+        len(client_instructions),
+        self._client_manager.num_available(),
+    )
+
+    # Collect `fit` results from all clients participating in this round
+    results, failures = fit_clients(
+        client_instructions=client_instructions,
+        max_workers=self.max_workers,
+        timeout=timeout,
+        group_id=server_round,
+    )
+
+    if len(failures) > 0:
+        send_discord_webhook(f"FAILURES OCCURED!!! {len(failures)} failures: {failures}")
+
+    log(
+        INFO,
+        "aggregate_fit: received %s results and %s failures",
+        len(results),
+        len(failures),
+    )
+
+    # Aggregate training results
+    aggregated_result: tuple[
+        Optional[Parameters],
+        dict[str, Scalar],
+    ] = self.strategy.aggregate_fit(server_round, results, failures)
+
+    parameters_aggregated, metrics_aggregated = aggregated_result
+    return parameters_aggregated, metrics_aggregated, (results, failures)
+
+Server.fit_round = send_DC_fit_round
 
 def main():
     args = parser_arguments()
@@ -347,8 +425,11 @@ def main():
     # Start Flower server
     flwr_server = fl.server
     flwr_server.start_server(
-        server_address="127.0.0.1:" + args.port,
-        config=fl.server.ServerConfig(num_rounds=total_rounds),
+        server_address=f"0.0.0.0:{args.port}",
+        config=fl.server.ServerConfig(
+            num_rounds=total_rounds,
+            round_timeout=600   # 避免 client 卡死或 crash 時 server 也跟著停
+        ),
         strategy=strategy,
     )
     send_discord_webhook('Lab End!')

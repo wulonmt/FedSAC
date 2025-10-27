@@ -334,7 +334,7 @@ class CartPoleSwingUpFixPosGoalOriented(CartPoleSwingUpFixInitStateV1):
             self.current_stable_steps = 0
         
         if self.current_stable_steps > self.total_stable_steps:
-            new_reward = 500
+            new_reward = 1000
             done = True
 
         return next_obs, new_reward, done, truncated, {}

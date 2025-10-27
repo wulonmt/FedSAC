@@ -163,6 +163,7 @@ cython_debug/
 .pypirc
 
 *.txt
+!requirements.txt
 wandb/
 test/
 multiagent/
@@ -172,3 +173,5 @@ flwr_run/
 results/
 **/__pycache__/
 *.pyc
+
+.env_test/

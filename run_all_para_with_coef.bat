@@ -2,15 +2,15 @@
 setlocal enabledelayedexpansion
 
 :: Setting environment variables for lists
-set "clients_list=5 10 20"
-:: set "clients_list=20"
-set "value_weight_list=0 1"
-:: set "value_weight_list=1"
-:: set "environments=CartPoleSwingUpFixInitState-v1 PendulumFixPos-v0 MountainCarFixPos-v0 HopperFixLength-v0 HalfCheetahFixLength-v0"
-:: set "environments=PendulumFixPos-v1 MountainCarFixPos-v1"
-set "environments=CartPoleSwingUpFixInitState-v2"
+:: set "clients_list=5 10 16"
+set "clients_list=5"
+:: set "value_weight_list=0 1"
+set "value_weight_list=1"
+set "environments=CartPoleSwingUpFixInitState-v2 PendulumFixPos-v1 MountainCarFixPos-v1 HopperFixLength-v0 HalfCheetahFixLength-v0"
+:: set "environments=HopperFixLength-v0 HalfCheetahFixLength-v0"
+:: set "environments=HalfCheetahFixLength-v0"
 
-set "total_cpu=20"
+set "total_cpu=10"
 
 :: Get current date and time with wmic command to ensure consistent format
 for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
@@ -36,6 +36,8 @@ for %%c in (%clients_list%) do (
         set "cpu_per_client=1"
     )
 
+    set "cpu_per_client=1"
+
     echo Debug: Clients: %%c, CPU per client: !cpu_per_client!
     
     :: Loop through environments and their rounds
@@ -43,8 +45,8 @@ for %%c in (%clients_list%) do (
         set "rounds=10"
         if "%%e"=="PendulumFixPos-v0" set "rounds=50"
         if "%%e"=="PendulumFixPos-v1" set "rounds=200"
-        if "%%e"=="MountainCarFixPos-v0" set "rounds=100"
-        if "%%e"=="MountainCarFixPos-v1" set "rounds=100"
+        if "%%e"=="MountainCarFixPos-v0" set "rounds=200"
+        if "%%e"=="MountainCarFixPos-v1" set "rounds=200"
         if "%%e"=="CartPoleSwingUpFixInitState-v1" set "rounds=150"
         if "%%e"=="CartPoleSwingUpFixInitState-v2" set "rounds=150"
         if "%%e"=="HopperFixLength-v0" set "rounds=600"
@@ -76,7 +78,7 @@ for %%c in (%clients_list%) do (
             :: Start all clients in separate PowerShell windows
             for /l %%i in (0,1,!last_agent!) do (
                 echo Starting client %%i
-                start /B python FERclient_FixState.py -i %%i -e %%e --value_weight %%v --log_dir !save_dir! --n_cpu !cpu_per_client!
+                start "Client %%i" cmd /c python FERclient_FixState.py -i %%i -e %%e --value_weight %%v --log_dir !save_dir! --n_cpu !cpu_per_client!
             )
 
             :: Start checking script and wait for it to complete

@@ -84,7 +84,7 @@ class PendulumFixPosGoalOriented(PendulumFixPos):
         new_reward = 0
         if self.current_stable_steps > self.total_stable_steps:
             terminal = True
-            new_reward = 1
+            new_reward = 100
 
         return obs, new_reward, terminal, truncated, {}
     
