@@ -11,15 +11,14 @@ from utils.init_pos_config import get_init_pos, get_init_list, assert_alarm
 
 import cv2
 
-RECORD = False
-SNAPSHOT = True
-EVALUATE = False
-DISPLAY = False
-
 def setting():
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--log_model", help="modle to be logged", type=str)
     parser.add_argument("-e", "--environment", help="which my- env been used", type=str, required=True)
+    parser.add_argument("--record", action="store_true", help="錄製影片")
+    parser.add_argument("--snapshot", action="store_true", help="顯示快照")
+    parser.add_argument("--evaluate", action="store_true", help="評估模型")
+    parser.add_argument("--display", action="store_true", help="顯示人類可見環境")
     args = parser.parse_args()
     return args
     
@@ -91,12 +90,19 @@ def make_wrapped_env(env_name, i=0):
 
 if __name__ == "__main__":
     args = setting()
+    
+    # 從 args 取得設定
+    RECORD = args.record
+    SNAPSHOT = args.snapshot
+    EVALUATE = args.evaluate
+    DISPLAY = args.display
+    
     index = 4
     assert_alarm(args.environment)
     env_name = args.environment
     log_env = args.log_model.split('/')[0].split('_')[0]
     rgb_env = gym.make(env_name, render_mode="rgb_array", **get_init_pos(env_name, index))
-    human_env = gym.make(env_name, render_mode="rgb_array", **get_init_pos(env_name, index))
+    human_env = gym.make(env_name, render_mode="human", **get_init_pos(env_name, index))
     rgb_env.reset()
     human_env.reset()
 
@@ -121,13 +127,6 @@ if __name__ == "__main__":
         reward_mean, reward_std = evaluate_policy(model, rgb_env)
         print(f"{reward_mean = }, {reward_std = }")
     
-    # for _ in range(10):
-    #     obs, info = env.reset()
-    #     done = truncated = False
-    #     while not (done or truncated):
-    #         action, _ = model.predict(obs)
-    #         obs, reward, done, truncated, info = env.step(action)
-    #         env.render()
     if DISPLAY:
         for _ in range(10):
             obs, info = human_env.reset()
@@ -138,16 +137,31 @@ if __name__ == "__main__":
                 obs, reward, done, truncated, info = human_env.step(action)
                 human_env.render()
                 counter += 1
-                if counter > 100:
+                if counter > 1000:
                     break
     
     if SNAPSHOT:
         print(f"{rgb_env.action_space = }")
         rgb_env.reset()
+        
+        # 從 action_space 取得合適的 action
+        sample_action = rgb_env.action_space.sample()
+        
         for _ in range(3):
-            obs, reward, done, truncated, info = rgb_env.step([0.5])
-
+            obs, reward, done, truncated, info = rgb_env.step(sample_action)
+        
+        print(f"obs shape: {obs.shape}")
+        print(f"obs type: {type(obs)}")
+        
+        # 檢查 obs 的維度
+        if len(obs.shape) >= 3:
             fig, axes = plt.subplots(ncols=4, figsize=(12, 5))
             for i, ax in enumerate(axes.flat):
-                ax.imshow(obs[i, ...].T, cmap=plt.get_cmap('gray'))
+                if i < obs.shape[0]:
+                    ax.imshow(obs[i, ...].T, cmap=plt.get_cmap('gray'))
+                else:
+                    ax.axis('off')
+        else:
+            print(f"Warning: obs shape {obs.shape} is not suitable for image display")
+        
         plt.show()
