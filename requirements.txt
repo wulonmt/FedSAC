@@ -5,3 +5,4 @@ tensorboard==2.19.0
 dotenv
 wandb
 gym[all]
+highway-env
