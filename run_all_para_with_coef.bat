@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 :: set "clients_list=5 10 16"
 set "clients_list=5"
 :: set "value_weight_list=0 1"
-set "value_weight_list=1"
+set "value_weight_list=2"
 set "environments=CartPoleSwingUpFixInitState-v2 PendulumFixPos-v1 MountainCarFixPos-v1 HopperFixLength-v0 HalfCheetahFixLength-v0"
 :: set "environments=HopperFixLength-v0 HalfCheetahFixLength-v0"
 :: set "environments=HalfCheetahFixLength-v0"
@@ -67,7 +67,7 @@ for %%c in (%clients_list%) do (
             
             :: Start server in a new PowerShell window
             echo Starting VW server
-            start /B python VWserver.py -r !rounds! -c %%c --log_dir !save_dir!
+            start /B python VWserver.py -r !rounds! -c %%c --log_dir !save_dir! -v %%v
 
             echo Server started, waiting for 3 seconds...
             timeout 5 > nul

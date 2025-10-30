@@ -59,7 +59,7 @@ class FixPosClient(fl.client.NumPyClient):
                 n_cpu=1):
         batch_size = 64
         add_kl = True if add_kl == 1 else False
-        value_as_weight = True if value_weight == 1 else False
+        value_as_weight = True if value_weight > 0 else False
         #self.env = gym.make(f"my-{environment}-v0", render_mode=rm)
         # self.env = make_vec_env(f"{environment}", n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
         init_length = len(get_init_list(environment))
