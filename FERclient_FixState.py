@@ -249,22 +249,22 @@ def main():
     )
     # sys.exit()
 
-    if args.index < 4:
-        env = gym.make(args.environment,
-                       render_mode="human",
-                       **get_init_pos(args.environment, args.index)
-                       )
-    else:
-        env = gym.make(args.environment, render_mode="human", **get_init_pos(args.environment, 4))
-    # env = gym.make(args.environment, render_mode="human")
+    # if args.index < 4:
+    #     env = gym.make(args.environment,
+    #                    render_mode="human",
+    #                    **get_init_pos(args.environment, args.index)
+    #                    )
+    # else:
+    #     env = gym.make(args.environment, render_mode="human", **get_init_pos(args.environment, 4))
+    # # env = gym.make(args.environment, render_mode="human")
 
-    while True:
-        obs, info = env.reset()
-        done = truncated = False
-        while not (done or truncated):
-            action, _ = client.model.predict(obs)
-            obs, reward, done, truncated, info = env.step(action)
-            env.render()
+    # while True:
+    #     obs, info = env.reset()
+    #     done = truncated = False
+    #     while not (done or truncated):
+    #         action, _ = client.model.predict(obs)
+    #         obs, reward, done, truncated, info = env.step(action)
+    #         env.render()
 
 if __name__ == "__main__":
     main()
